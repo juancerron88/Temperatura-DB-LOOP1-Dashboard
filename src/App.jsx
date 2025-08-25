@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import dayjs from "dayjs";
 import "modern-normalize"; // opcional
-import "./app.css";
+import "./App.css";
 import { getHistory, getLatest } from "./lib/api";
 
 const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
