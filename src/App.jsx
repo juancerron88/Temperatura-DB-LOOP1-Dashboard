@@ -86,6 +86,19 @@ export default function App() {
 
         <div className="card stretch">
           <h3>Historial (últimas {rows.length})</h3>
+                        <a
+                className="download"
+                href={`${import.meta.env.VITE_API_BASE}/api/thermo/export?deviceId=${encodeURIComponent(deviceId)}&limit=20000&format=csv${import.meta.env.VITE_API_KEY ? `&key=${encodeURIComponent(import.meta.env.VITE_API_KEY)}` : ""}`}
+              >
+                Descargar CSV
+              </a>
+              &nbsp;|&nbsp;
+              <a
+                className="download"
+                href={`${import.meta.env.VITE_API_BASE}/api/thermo/export?deviceId=${encodeURIComponent(deviceId)}&limit=20000&format=xlsx${import.meta.env.VITE_API_KEY ? `&key=${encodeURIComponent(import.meta.env.VITE_API_KEY)}` : ""}`}
+              >
+                Descargar XLSX
+              </a>
           <div className="chart">
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={chartData}>
