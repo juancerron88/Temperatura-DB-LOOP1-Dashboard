@@ -62,19 +62,29 @@ export default function App() {
   }, [deviceId]);
 
   // Datos para el chart: orden cronológico ascendente
-  const chartData = useMemo(
-    () =>
-      rows
-        .slice()
-        .reverse()
-        .map((r) => ({
-          tsISO: r.createdAt,
-          t: dayjs(r.createdAt).format("HH:mm:ss"),
-          c: Number(r.celsius),
-          sensor: r.sensor,
-        })),
-    [rows]
-  );
+  const chartData = useMemo(() => {
+  // Orden cronológico ascendente
+  const asc = rows.slice().reverse();
+
+  // Lista de sensores (si aún no está calculada)
+  const sens = sensorList.length
+    ? sensorList
+    : Array.from(new Set(asc.map(r => r.sensor)));
+
+  // Para cada lectura creamos un punto con columnas por sensor
+  return asc.map(r => {
+    const p = {
+      tsISO: r.createdAt,
+      t: dayjs(r.createdAt).format("HH:mm:ss"),
+    };
+    // inicializa todas las series en null para que haya gaps
+    sens.forEach(s => { p[s] = null; });
+    // valor solo en la serie del sensor correspondiente
+    p[r.sensor] = Number(r.celsius);
+    return p;
+  });
+}, [rows, sensorList]);
+
 
   const toggleSensor = (s) => setActive(prev => ({ ...prev, [s]: !prev[s] }));
 
