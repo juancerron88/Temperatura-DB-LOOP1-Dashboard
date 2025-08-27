@@ -166,7 +166,7 @@ export default function App() {
                     <Line
                       key={s}
                       type="monotone"
-                      dataKey={(row) => (row.sensor === s ? row.c : null)}
+                      dataKey={s}        // <- ahora es el nombre de la columna
                       name={s}
                       dot={false}
                       strokeWidth={2}
@@ -174,6 +174,7 @@ export default function App() {
                     />
                   ) : null
                 )}
+
               </LineChart>
             </ResponsiveContainer>
           </div>
