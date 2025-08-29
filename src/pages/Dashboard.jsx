@@ -25,12 +25,12 @@ export default function Dashboard() {
 
       <section className="cards">
         <LatestCard latest={latest} status={status} />
-        <SensorChart
-          chartData={chartData}
-          sensors={sensors}
-          active={active}
-          onToggle={(s)=>setActive(prev=>({ ...prev, [s]: !prev[s] }))}
-        />
+            <SensorChart
+            rows={rows}
+            enabled={enabled}
+            colors={{ K1: "#0074D9", K2: "#FF4136", default: "#2ECC40" }}
+            />
+
         {/* Actuadores (cuando el backend esté listo) */}
         {/* <ActuatorPanel deviceId={deviceId} /> */}
       </section>
