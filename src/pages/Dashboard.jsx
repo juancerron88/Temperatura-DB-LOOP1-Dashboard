@@ -20,7 +20,7 @@ export default function Dashboard() {
   return (
     <div className="page">
       <header className="topbar">
-        <h1>Heltec Thermo Dashboard</h1>
+        <h1>SCADA de Baterías de Arena</h1>
         <div className="controls">
           <label>
             Device ID:&nbsp;
