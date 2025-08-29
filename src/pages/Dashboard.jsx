@@ -9,7 +9,7 @@ const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
 
 const COLORS = {
   K1:"#1f77b4", K2:"#ff7f0e", K3:"#2ca02c", K4:"#d62728",
-  K5:"#9467bd", K6:"#8c564b", K7:"#e377c2", K8:"#7f7f7f",
+  K5:"#9467bd", K6:"#8c564b", K7:"#e377c2", K8:"#3a2481ff",
   default:"#17becf"
 };
 
