@@ -47,12 +47,13 @@ export default function Dashboard() {
 
         <div className="card stretch">
           <h3>Historial (últimas {chartData.length})</h3>
-          <SensorChart
+            <SensorChart
             chartData={chartData}
             sensors={sensors}
             enabled={active}
-            colors={COLORS}
-          />
+            colors={{ K1: "#0074D9", K2: "#FF4136", default: "#2ECC40" }}
+            />
+
         </div>
 
         {/* Actuadores (cuando el backend esté listo) */}
