@@ -3,15 +3,19 @@ import { useState } from "react";
 import useThermoData from "../hooks/useThermoData";
 import LatestCard from "../components/LatestCard";
 import SensorChart from "../components/SensorChart";
-// import ActuatorPanel from "../components/ActuatorPanel";
+import ActuatorPanel from "../components/ActuatorPanel";
 
 const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
 
+const COLORS = {
+  K1:"#1f77b4", K2:"#ff7f0e", K3:"#2ca02c", K4:"#d62728",
+  K5:"#9467bd", K6:"#8c564b", K7:"#e377c2", K8:"#7f7f7f",
+  default:"#17becf"
+};
+
 export default function Dashboard() {
   const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE);
-  const { latest, status, sensors, active, setActive, chartData } = useThermoData(deviceId, 500);
-
-  const COLORS = { K1: "#0074D9", K2: "#FF4136", default: "#2ECC40" };
+  const { latest, status, sensors, active, setActive, chartData } = useThermoData(deviceId, 1000);
 
   return (
     <div className="page">
@@ -28,7 +32,6 @@ export default function Dashboard() {
       <section className="cards">
         <LatestCard latest={latest} status={status} />
 
-        {/* Filtros por sensor */}
         <div className="card">
           <h3>Sensores</h3>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -47,21 +50,19 @@ export default function Dashboard() {
 
         <div className="card stretch">
           <h3>Historial (últimas {chartData.length})</h3>
-            <SensorChart
+          <SensorChart
             chartData={chartData}
             sensors={sensors}
             enabled={active}
-            colors={{ K1: "#0074D9", K2: "#FF4136", default: "#2ECC40" }}
-            />
-
+            colors={COLORS}
+          />
         </div>
 
-        {/* Actuadores (cuando el backend esté listo) */}
-        {/* <ActuatorPanel deviceId={deviceId} /> */}
+        <ActuatorPanel deviceId={deviceId} />
       </section>
 
       <footer className="foot">
-        API: {import.meta.env.VITE_API_BASE} · {import.meta.env.VITE_API_KEY ? "GET con API key" : "GET público"}
+        API: {import.meta.env.VITE_API_BASE} · {import.meta.env.VITE_API_KEY ? "GET/PUT con API key" : "API pública"}
       </footer>
     </div>
   );

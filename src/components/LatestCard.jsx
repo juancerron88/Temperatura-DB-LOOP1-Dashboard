@@ -7,7 +7,7 @@ export default function LatestCard({ latest, status }) {
       <h3>Última lectura</h3>
       {latest ? (
         <div className="latest">
-          <div className="temp">{latest.celsius.toFixed(2)} °C</div>
+          <div className="temp">{Number(latest.celsius).toFixed(2)} °C</div>
           <div className="meta">
             <div>Device: <b>{latest.deviceId}</b></div>
             <div>Hora: {dayjs(latest.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
