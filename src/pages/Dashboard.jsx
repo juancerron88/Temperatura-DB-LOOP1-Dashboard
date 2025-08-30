@@ -3,8 +3,7 @@ import { useState } from "react";
 import useThermoData from "../hooks/useThermoData";
 import LatestCard from "../components/LatestCard";
 import SensorChart from "../components/SensorChart";
-import ControlPanel from "../components/ControlPanel";   // 👈 Panel de control automático/manual
-// import RelayPanel from "../components/RelayPanel";    // 👈 Opcional: botones ON/OFF directos
+import ActuatorPanel from "../components/ActuatorPanel"; // ✅
 
 const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
 
@@ -42,11 +41,10 @@ export default function Dashboard() {
       </header>
 
       <section className="cards">
-        {/* Última lectura */}
         <LatestCard latest={latest} status={status} />
 
-        {/* Panel de control (manual / automático con setpoint e histeresis) */}
-        <ControlPanel deviceId={deviceId} />
+        {/* Panel de relés / actuadores */}
+        <ActuatorPanel deviceId={deviceId} />
 
         {/* Selector de sensores */}
         <div className="card">
@@ -64,12 +62,7 @@ export default function Dashboard() {
                     setActive((prev) => ({ ...prev, [s]: !prev[s] }))
                   }
                 />
-                <span
-                  style={{
-                    color: COLORS[s] || "#8884d8",
-                    fontWeight: 600,
-                  }}
-                >
+                <span style={{ color: COLORS[s] || "#8884d8", fontWeight: 600 }}>
                   {s}
                 </span>
               </label>
@@ -87,9 +80,6 @@ export default function Dashboard() {
             colors={COLORS}
           />
         </div>
-
-        {/* Panel de relés ON/OFF directo (opcional, solo si creas RelayPanel.jsx) */}
-        {/* <RelayPanel deviceId={deviceId} /> */}
       </section>
 
       <footer className="foot">
