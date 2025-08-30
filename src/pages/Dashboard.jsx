@@ -3,19 +3,27 @@ import { useState } from "react";
 import useThermoData from "../hooks/useThermoData";
 import LatestCard from "../components/LatestCard";
 import SensorChart from "../components/SensorChart";
-import ActuatorPanel from "../components/ActuatorPanel";
+import ControlPanel from "../components/ControlPanel";   // 👈 nuevo
+import RelayPanel from "../components/RelayPanel";       // 👈 nuevo
 
 const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
 
 const COLORS = {
-  K1:"#1f77b4", K2:"#ff7f0e", K3:"#2ca02c", K4:"#d62728",
-  K5:"#9467bd", K6:"#8c564b", K7:"#e377c2", K8:"#3a2481ff",
-  default:"#17becf"
+  K1: "#4ea1ff",
+  K2: "#6dd5ed",
+  K3: "#7ee787",
+  K4: "#2ecc71",
+  K5: "#f1c40f",
+  K6: "#e67e22",
+  K7: "#fd79a8",
+  K8: "#e056fd",
+  default: "#17becf",
 };
 
 export default function Dashboard() {
   const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE);
-  const { latest, status, sensors, active, setActive, chartData } = useThermoData(deviceId, 1000);
+  const { latest, status, sensors, active, setActive, chartData } =
+    useThermoData(deviceId, 800);
 
   return (
     <div className="page">
@@ -24,30 +32,52 @@ export default function Dashboard() {
         <div className="controls">
           <label>
             Device ID:&nbsp;
-            <input value={deviceId} onChange={(e)=>setDeviceId(e.target.value.trim())} />
+            <input
+              value={deviceId}
+              onChange={(e) => setDeviceId(e.target.value.trim())}
+              placeholder="heltec-v3-01"
+            />
           </label>
         </div>
       </header>
 
       <section className="cards">
+        {/* Última lectura */}
         <LatestCard latest={latest} status={status} />
 
+        {/* Panel de control automático/manual */}
+        <ControlPanel deviceId={deviceId} />
+
+        {/* Selector de sensores */}
         <div className="card">
           <h3>Sensores</h3>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {sensors.map(s => (
-              <label key={s} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {sensors.map((s) => (
+              <label
+                key={s}
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+              >
                 <input
                   type="checkbox"
                   checked={!!active[s]}
-                  onChange={() => setActive(prev => ({ ...prev, [s]: !prev[s] }))}
+                  onChange={() =>
+                    setActive((prev) => ({ ...prev, [s]: !prev[s] }))
+                  }
                 />
-                <span style={{ color: COLORS[s] || "#8884d8", fontWeight: 600 }}>{s}</span>
+                <span
+                  style={{
+                    color: COLORS[s] || "#8884d8",
+                    fontWeight: 600,
+                  }}
+                >
+                  {s}
+                </span>
               </label>
             ))}
           </div>
         </div>
 
+        {/* Gráfico histórico */}
         <div className="card stretch">
           <h3>Historial (últimas {chartData.length})</h3>
           <SensorChart
@@ -58,11 +88,13 @@ export default function Dashboard() {
           />
         </div>
 
-        <ActuatorPanel deviceId={deviceId} />
+        {/* Panel de relés */}
+        <RelayPanel deviceId={deviceId} />
       </section>
 
       <footer className="foot">
-        API: {import.meta.env.VITE_API_BASE} · {import.meta.env.VITE_API_KEY ? "GET/PUT con API key" : "API pública"}
+        API: {import.meta.env.VITE_API_BASE} ·{" "}
+        {import.meta.env.VITE_API_KEY ? "GET/PUT con API key" : "API pública"}
       </footer>
     </div>
   );

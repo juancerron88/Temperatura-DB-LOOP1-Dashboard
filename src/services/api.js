@@ -2,69 +2,67 @@
 const BASE = import.meta.env.VITE_API_BASE;
 const KEY  = import.meta.env.VITE_API_KEY;
 
-// headers comunes
-function authHeaders() {
-  return KEY ? { "x-api-key": KEY } : {};
-}
+// Cabecera de auth opcional
+const auth = () => (KEY ? { "x-api-key": KEY } : {});
 
-// helpers
-async function apiGet(path) {
-  const r = await fetch(`${BASE}${path}`, {
-    headers: { ...authHeaders() },
-  });
-  if (!r.ok) {
-    const txt = await r.text().catch(() => "");
-    throw new Error(`GET ${path} -> ${r.status} ${txt}`);
-  }
-  return r.json();
-}
-
-async function apiJson(path, method, body) {
-  const r = await fetch(`${BASE}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-    },
-    body: JSON.stringify(body),
-  });
+// Pequeño helper de parseo/errores
+const parse = async (r, method, path) => {
   if (!r.ok) {
     const txt = await r.text().catch(() => "");
     throw new Error(`${method} ${path} -> ${r.status} ${txt}`);
   }
   return r.json();
-}
+};
 
 /* ---------- THERMO ---------- */
-export const getLatest  = (deviceId) =>
-  apiGet(`/api/thermo/latest?deviceId=${encodeURIComponent(deviceId)}`);
+export const getLatest = (deviceId) =>
+  fetch(`${BASE}/api/thermo/latest?deviceId=${encodeURIComponent(deviceId)}`, {
+    headers: auth(),
+  }).then((r) => parse(r, "GET", "/api/thermo/latest"));
 
 export const getHistory = (deviceId, limit = 500) =>
-  apiGet(`/api/thermo/history?deviceId=${encodeURIComponent(deviceId)}&limit=${limit}`);
+  fetch(
+    `${BASE}/api/thermo/history?deviceId=${encodeURIComponent(
+      deviceId
+    )}&limit=${limit}`,
+    { headers: auth() }
+  ).then((r) => parse(r, "GET", "/api/thermo/history"));
 
 export const getSensors = (deviceId) =>
-  apiGet(`/api/thermo/sensors?deviceId=${encodeURIComponent(deviceId)}`);
+  fetch(`${BASE}/api/thermo/sensors?deviceId=${encodeURIComponent(deviceId)}`, {
+    headers: auth(),
+  }).then((r) => parse(r, "GET", "/api/thermo/sensors"));
 
-/* ---------- RELAY (coincide con tu backend) ---------- */
-// Lo que usa la placa para leer estados
+export const getSummary = (deviceId, windowSec = 600) =>
+  fetch(
+    `${BASE}/api/thermo/summary?deviceId=${encodeURIComponent(
+      deviceId
+    )}&windowSec=${windowSec}`,
+    { headers: auth() }
+  ).then((r) => parse(r, "GET", "/api/thermo/summary"));
+
+/* ---------- RELAY (MANUAL) ---------- */
 export const getRelayState = (deviceId) =>
-  apiGet(`/api/relay/pull?deviceId=${encodeURIComponent(deviceId)}`);
+  fetch(`${BASE}/api/relay/pull?deviceId=${encodeURIComponent(deviceId)}`, {
+    headers: auth(),
+  }).then((r) => parse(r, "GET", "/api/relay/pull"));
 
-// Cambiar un relé (modo manual desde UI)
 export const setRelay = (deviceId, relayId, { state, holdSec }) =>
-  apiJson(`/api/relay/set`, "POST", {
-    deviceId,
-    relay: relayId,   // "R1" | "R2" | "R3"
-    state,            // true / false
-    holdSec,          // opcional (segundos)
-  });
+  fetch(`${BASE}/api/relay/set`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...auth() },
+    body: JSON.stringify({ deviceId, relay: relayId, state, holdSec }),
+  }).then((r) => parse(r, "POST", "/api/relay/set"));
 
-// Si quieres “bulk”, no hay endpoint en tu backend: haz varios setRelay en paralelo
-export async function setRelays(deviceId, relaysObj /* {R1:{state,holdSec}, ...} */) {
-  const tasks = Object.entries(relaysObj).map(([relay, payload]) =>
-    setRelay(deviceId, relay, payload)
-  );
-  // devuelve el último estado leído tras aplicar todos
-  await Promise.all(tasks);
-  return getRelayState(deviceId);
-}
+/* ---------- CONTROL (AUTO/MANUAL + SP/H + duty) ---------- */
+export const getControl = (deviceId) =>
+  fetch(`${BASE}/api/control?deviceId=${encodeURIComponent(deviceId)}`, {
+    headers: auth(),
+  }).then((r) => parse(r, "GET", "/api/control"));
+
+export const setControl = (deviceId, payload) =>
+  fetch(`${BASE}/api/control`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...auth() },
+    body: JSON.stringify({ deviceId, ...payload }),
+  }).then((r) => parse(r, "PUT", "/api/control"));

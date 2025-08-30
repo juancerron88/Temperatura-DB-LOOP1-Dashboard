@@ -1,15 +1,32 @@
-:root { font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; }
-.page { padding: 16px; max-width: 1100px; margin: 0 auto; }
-.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.controls input { padding:6px 8px; font-size:14px; }
-.cards { display:grid; grid-template-columns: 340px 1fr; gap:12px; }
-.card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; }
-.card.stretch { grid-column: span 2; }
-.latest { display:flex; align-items:center; gap:16px; }
-.temp { font-size:28px; font-weight:700; }
-.status { margin-top:8px; font-size:12px; opacity:0.8; }
-.foot { margin-top:16px; font-size:12px; opacity:0.7; }
-@media (max-width: 920px) {
-  .cards { grid-template-columns: 1fr; }
-  .card.stretch { grid-column: span 1; }
+:root {
+  color-scheme: dark;
+  --bg: #0b0f14;
+  --card: #121822;
+  --text: #e9f0f7;
+  --muted: #9fb3c8;
+  --accent: #4ea1ff;
+  --ok: #2ecc71; --warn:#f1c40f; --alarm:#e74c3c;
+  --border: #1e2633;
 }
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; background: var(--bg); color: var(--text); }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.topbar { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+.controls input, .controls select { background: var(--card); color: var(--text); border:1px solid var(--border); padding:8px; border-radius:8px; }
+
+.cards { display:grid; gap:12px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .cards { grid-template-columns: 1fr 1fr; } }
+.card { background: var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; }
+.card h3 { margin-top:0; }
+button { background: var(--accent); color:#001b33; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; }
+button:disabled { opacity:.6; cursor:default; }
+
+.grid { display:grid; gap:8px; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); margin-bottom: 8px; }
+.grid .row { display:flex; align-items:center; gap:8px; }
+
+.meta { color: var(--muted); display:flex; gap:16px; flex-wrap:wrap; margin:8px 0; }
+.error { color: var(--alarm); margin-bottom:8px; }
+.legend { display:flex; gap:12px; flex-wrap:wrap; font-size: 14px; color: var(--muted); }
+.legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
