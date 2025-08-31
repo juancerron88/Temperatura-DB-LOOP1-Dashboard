@@ -54,6 +54,12 @@ export const setRelay = (deviceId, relayId, { state, holdSec }) =>
     body: JSON.stringify({ deviceId, relay: relayId, state, holdSec }),
   }).then((r) => parse(r, "POST", "/api/relay/set"));
 
+/* ---------- RELAY (ESTADO REAL AUTO + MANUAL) ---------- */
+export const getRelayStatus = (deviceId) =>
+  fetch(`${BASE}/api/relay/status?deviceId=${encodeURIComponent(deviceId)}`, {
+    headers: auth(),
+  }).then((r) => parse(r, "GET", "/api/relay/status"));
+
 /* ---------- CONTROL (AUTO/MANUAL + SP/H + duty) ---------- */
 export const getControl = (deviceId) =>
   fetch(`${BASE}/api/control?deviceId=${encodeURIComponent(deviceId)}`, {
