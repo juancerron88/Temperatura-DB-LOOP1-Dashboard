@@ -1,10 +1,10 @@
-// src/pages/Dashboard.jsx
 import { useState } from "react";
 import useThermoData from "../hooks/useThermoData";
 import LatestCard from "../components/LatestCard";
 import SensorChart from "../components/SensorChart";
-import ControlPanel from "../components/ControlPanel";   // 👈 importa ControlPanel
-import ActuatorPanel from "../components/ActuatorPanel"; // (manual relés)
+import ControlPanel from "../components/ControlPanel";
+import ActuatorPanel from "../components/ActuatorPanel";
+import LoopStatus from "../components/LoopStatus";
 
 const DEFAULT_DEVICE = import.meta.env.VITE_DEVICE_ID || "heltec-v3-01";
 
@@ -16,8 +16,10 @@ const COLORS = {
 
 export default function Dashboard() {
   const [deviceId, setDeviceId] = useState(DEFAULT_DEVICE);
-  const { latest, status, sensors, active, setActive, chartData } =
+  const { latest, status, sensors, active, setActive, chartData, summary, control, relay } =
     useThermoData(deviceId, 800);
+
+  const mode = (control?.mode || "manual").toLowerCase();
 
   return (
     <div className="page">
@@ -26,11 +28,7 @@ export default function Dashboard() {
         <div className="controls">
           <label>
             Device ID:&nbsp;
-            <input
-              value={deviceId}
-              onChange={(e) => setDeviceId(e.target.value.trim())}
-              placeholder="heltec-v3-01"
-            />
+            <input value={deviceId} onChange={(e)=>setDeviceId(e.target.value.trim())} placeholder="heltec-v3-01" />
           </label>
         </div>
       </header>
@@ -38,34 +36,38 @@ export default function Dashboard() {
       <section className="cards">
         <LatestCard latest={latest} status={status} />
 
-        {/* 👇 Panel AUTOMÁTICO (setpoints/histeresis) */}
         <ControlPanel deviceId={deviceId} />
 
-        {/* Selector de sensores */}
+        <LoopStatus control={control} relay={relay} />
+
         <div className="card">
           <h3>Sensores</h3>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {sensors.map((s) => (
-              <label key={s} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+            {sensors.map(s => (
+              <label key={s} style={{ display:"flex", alignItems:"center", gap:6 }}>
                 <input
                   type="checkbox"
                   checked={!!active[s]}
-                  onChange={() => setActive((prev) => ({ ...prev, [s]: !prev[s] }))}
+                  onChange={() => setActive(prev => ({ ...prev, [s]: !prev[s] }))}
                 />
-                <span style={{ color: COLORS[s] || "#8884d8", fontWeight: 600 }}>{s}</span>
+                <span style={{ color: COLORS[s] || "#8884d8", fontWeight:600 }}>{s}</span>
               </label>
             ))}
           </div>
+          {summary && (
+            <div style={{marginTop:8,fontSize:13,opacity:.85}}>
+              PV1 (K1..K4): <b>{summary.t1_avg?.toFixed?.(2) ?? "-"}</b> °C ·
+              PV2 (K5..K6): <b>{summary.t2_avg?.toFixed?.(2) ?? "-"}</b> °C
+            </div>
+          )}
         </div>
 
-        {/* Gráfico histórico */}
         <div className="card stretch">
           <h3>Historial (últimas {chartData.length})</h3>
           <SensorChart chartData={chartData} sensors={sensors} enabled={active} colors={COLORS} />
         </div>
 
-        {/* 👇 Panel MANUAL de relés */}
-        <ActuatorPanel deviceId={deviceId} />
+        <ActuatorPanel deviceId={deviceId} disabled={mode !== "manual"} />
       </section>
 
       <footer className="foot">
