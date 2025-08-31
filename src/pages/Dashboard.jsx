@@ -132,7 +132,7 @@ export default function Dashboard() {
         {/* Izquierda: top view K1..K4 + R1/R2 */}
         <div className="card big">
           <div className="scene">
-            <img src="/img/bateria-top.jpg" alt="top view" className="scene-img" />
+            <img src="/images/mesa1.jpg" alt="top view" className="scene-img" />
             {/* Sondas K1..K4 etiquetadas (posiciones aproximadas) */}
             <TempBadge x="10%" y="46%" label="K1" value={pick(latest, "K1")} />
             <TempBadge x="27%" y="46%" label="K2" value={pick(latest, "K2")} />
@@ -173,7 +173,7 @@ export default function Dashboard() {
         {/* Derecha: 3D view K5..K8 + R3 */}
         <div className="card big">
           <div className="scene">
-            <img src="/img/bateria-3d.jpg" alt="3d view" className="scene-img" />
+            <img src="/images/mesa2.jpg" alt="3d view" className="scene-img" />
             <TempBadge x="25%" y="22%" label="K5" value={pick(latest, "K5")} />
             <TempBadge x="61%" y="22%" label="K6" value={pick(latest, "K6")} />
             <TempBadge x="58%" y="64%" label="K7" value={pick(latest, "K7")} />
