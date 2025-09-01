@@ -1,75 +1,93 @@
 // src/components/SensorChart.jsx
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from "recharts";
 
-export default function SensorChart({ data, series, showToggles=false }) {
-  const [enabled, setEnabled] = useState(() =>
-    Object.fromEntries(series.map(s => [s.key, true]))
-  );
+export default function SensorChart({
+  chartData,
+  sensors,
+  enabled,
+  colors,
+}) {
+  const data = Array.isArray(chartData) ? chartData : [];
+  const sens = Array.isArray(sensors) ? sensors : [];
+  const en = enabled && typeof enabled === "object" ? enabled : {};
 
   const yDomain = useMemo(() => {
     const vals = [];
-    data.forEach(p => {
-      series.forEach(s => {
-        const v = p[s.key];
-        if (typeof v === "number" && !Number.isNaN(v)) vals.push(v);
+    data.forEach((p) => {
+      Object.keys(p || {}).forEach((k) => {
+        if (k !== "t" && k !== "tsISO" && k !== "ts") {
+          const v = p[k];
+          if (typeof v === "number" && !Number.isNaN(v)) vals.push(v);
+        }
       });
     });
     if (!vals.length) return [0, 350];
-    const min = Math.min(...vals), max = Math.max(...vals);
-    const pad = 2, lo = Math.max(0, Math.floor(min)-pad), hi = Math.min(350, Math.ceil(max)+pad);
-    return lo===hi ? [Math.max(0,lo-1), Math.min(350,hi+1)] : [lo,hi];
-  }, [data, series]);
+    const min = Math.min(...vals),
+      max = Math.max(...vals);
+    const pad = 2;
+    const lo = Math.max(0, Math.floor(min) - pad);
+    const hi = Math.min(350, Math.ceil(max) + pad);
+    return lo === hi ? [Math.max(0, lo - 1), Math.min(350, hi + 1)] : [lo, hi];
+  }, [data]);
 
   return (
-    <>
-      {showToggles && (
-        <div className="chart-toggles">
-          {series.map(s => (
-            <label key={s.key} className="toggle-item">
-              <input
-                type="checkbox"
-                checked={!!enabled[s.key]}
-                onChange={(e)=>setEnabled(prev => ({...prev, [s.key]: e.target.checked}))}
-              />
-              <span style={{color:s.color}}>{s.key}</span>
-            </label>
-          ))}
-        </div>
-      )}
-
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="ts"
-            type="number"
-            domain={["dataMin","dataMax"]}
-            tick={{ fontSize: 12 }}
-            tickFormatter={(v)=>dayjs(v).format("HH:mm:ss")}
-          />
-          <YAxis domain={yDomain} tick={{ fontSize: 12 }} unit="°C" />
-          <Tooltip labelFormatter={(v)=>dayjs(v).format("YYYY-MM-DD HH:mm:ss")} />
-          <Legend />
-          {series.map(s => enabled[s.key] && (
+    <ResponsiveContainer width="100%" height={320}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="ts"
+          type="number"
+          domain={["dataMin", "dataMax"]}
+          tick={{ fontSize: 12 }}
+          tickFormatter={(v) => (v ? dayjs(v).format("HH:mm:ss") : "")}
+        />
+        <YAxis domain={yDomain} tick={{ fontSize: 12 }} unit="°C" />
+        <Tooltip
+          labelFormatter={(v) =>
+            v ? dayjs(v).format("YYYY-MM-DD HH:mm:ss") : ""
+          }
+        />
+        <Legend />
+        {sens.map((s, i) =>
+          en[s] ? (
             <Line
-              key={s.key}
+              key={s}
               type="monotone"
-              dataKey={s.key}
-              name={s.key}
-              stroke={s.color}
+              dataKey={s}
+              name={s}
+              stroke={colors?.[s] || COLORS_FALLBACK[i % COLORS_FALLBACK.length]}
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
-              connectNulls
-              strokeDasharray={s.dashed ? "6 6" : undefined}
+              connectNulls={true}
             />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </>
+          ) : null
+        )}
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
+
+const COLORS_FALLBACK = [
+  "#1f77b4",
+  "#ff7f0e",
+  "#2ca02c",
+  "#d62728",
+  "#9467bd",
+  "#8c564b",
+  "#e377c2",
+  "#7f7f7f",
+  "#bcbd22",
+  "#17becf",
+];
