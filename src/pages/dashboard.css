@@ -1,0 +1,123 @@
+/* src/pages/dashboard.css */
+
+:root{
+  --bg:#0c2630;
+  --card:#14313b;
+  --card-dark:#0f2831;
+  --border:#1e505f;
+  --chip:#143f4a;
+  --input:#122f38;
+  --input-b:#2a5e6e;
+  --text:#e9f2f8;
+}
+
+.page{ padding:16px 16px 56px; color:var(--text); background:var(--bg); }
+.page-top h1{ margin:8px 0 12px; font-size:clamp(18px, 2.6vw, 28px); }
+
+.top-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+.chip{
+  background:var(--chip); border:1px solid var(--border);
+  border-radius:10px; padding:6px 10px; display:inline-flex; align-items:center; gap:8px;
+}
+.chip input, .chip select{
+  background:var(--input); border:1px solid var(--input-b);
+  border-radius:8px; padding:6px 8px; color:var(--text); min-width:160px;
+}
+.chip.link{ text-decoration:none; color:#cde9f3; }
+
+.btn{
+  background:#2a8ab3; border:none; border-radius:10px; padding:8px 14px;
+  color:#0a1b21; font-weight:600; cursor:pointer;
+}
+.btn.apply{ white-space:nowrap; }
+.btn:hover{ filter:brightness(1.05); }
+
+.top-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:12px;
+}
+.card.dark{ background:var(--card-dark); }
+
+.row{
+  display:grid; grid-template-columns:120px 1fr 32px;
+  align-items:center; gap:8px; margin-bottom:8px;
+}
+.row input{
+  background:var(--input); border:1px solid var(--input-b);
+  border-radius:8px; padding:6px 8px; color:var(--text);
+}
+.row .unit{ opacity:.7; }
+
+.mid-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
+.card.big{ position:relative; }
+
+.scene{
+  position:relative; width:100%;
+  aspect-ratio: 16/10; /* ajusta sola en responsive */
+  background:#0a232b; border-radius:10px; overflow:hidden;
+}
+.scene-img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.temp-badge{
+  position:absolute; transform:translate(-50%,-50%);
+  background:#e9f2f8; color:#0c2430; border-radius:10px; padding:6px 8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+  min-width:56px; text-align:center; font-size:12px; line-height:1.2;
+}
+.temp-badge .tlabel{ font-weight:700; }
+.temp-badge .tval{ font-variant-numeric: tabular-nums; }
+
+.manual-box{
+  position:absolute; right:10px; top:10px; width:220px;
+  background:rgba(10,35,43,.75); border:1px solid #204b58;
+  border-radius:12px; padding:10px; backdrop-filter: blur(2px);
+}
+.manual-box h4{ margin:0 0 8px; font-size:14px; }
+.rel-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 0; }
+.rel-title{ font-weight:700; }
+
+.toggle{
+  width:64px; height:30px; background:#17343f; border-radius:30px;
+  padding:3px; cursor:pointer; display:flex; align-items:center;
+}
+.toggle.on{ background:#36b37e; color:#06251c; justify-content:flex-end; }
+.toggle.off{ background:#a23838; color:#2e0404; justify-content:flex-start; }
+.toggle span{ background:white; border-radius:999px; padding:4px 8px; font-weight:700; font-size:12px; }
+
+.chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+
+.charts{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.chart-toggles{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+.toggle-item{ display:inline-flex; align-items:center; gap:6px; }
+
+/* -------- Responsive ------- */
+
+/* <= 1024: tablet */
+@media (max-width: 1024px){
+  .top-cards{ grid-template-columns:1fr; }
+  .mid-grid{ grid-template-columns:1fr; }
+  .charts{ grid-template-columns:1fr; }
+  .manual-box{ width:200px; }
+}
+
+/* <= 768: móvil grande */
+@media (max-width: 768px){
+  .chip input, .chip select{ min-width:140px; }
+  .row{ grid-template-columns:100px 1fr 28px; }
+  .manual-box{ position:static; width:100%; margin-top:8px; }
+  .temp-badge{ font-size:11px; padding:5px 7px; min-width:50px; }
+  .toggle{ width:60px; height:28px; }
+}
+
+/* <= 480: móvil pequeño */
+@media (max-width: 480px){
+  .page{ padding:12px 10px 40px; }
+  .chip input, .chip select{ min-width:120px; }
+  .btn.apply{ width:100%; }
+  .scene{ aspect-ratio: 4/3; } /* más alto en móvil */
+  .temp-badge{ font-size:10px; padding:4px 6px; min-width:46px; }
+  .row{ grid-template-columns:86px 1fr 24px; gap:6px; }
+  .charts .card h4{ font-size:14px; }
+}
+.foot-note{ margin-top:16px; opacity:.6; font-size:12px; }
