@@ -75,7 +75,7 @@ export default function Dashboard() {
           </div>
 
           <a
-            href="https://docs.google.com/spreadsheets/d/xxxxxxxx"
+            href="https://docs.google.com/spreadsheets/d/1X5VU7hLeUMwdZlkq76fE4hrOM3po1YOUS1HqzHjaHdM/edit?usp=sharing"
             target="_blank" rel="noreferrer"
             className="chip-link"
           >
