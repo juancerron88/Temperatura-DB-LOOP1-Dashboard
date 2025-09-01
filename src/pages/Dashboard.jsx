@@ -143,10 +143,10 @@ export default function Dashboard() {
           <div className="scene">
             <img src="/images/mesa1.jpg" alt="top view" className="scene-img" />
 
-            <TempBadge x="20%" y="45%" label="K1" value={curr.K1} />
-            <TempBadge x="20%" y="75%" label="K2" value={curr.K2} />
-            <TempBadge x="78%" y="45%" label="K3" value={curr.K3} />
-            <TempBadge x="78%" y="75%" label="K4" value={curr.K4} />
+            <TempBadge x="20%" y="75%" label="K1" value={curr.K1} />
+            <TempBadge x="45%" y="35%" label="K2" value={curr.K2} />
+            <TempBadge x="50%" y="65%" label="K3" value={curr.K3} />
+            <TempBadge x="78%" y="35%" label="K4" value={curr.K4} />
 
             <div className={"heater h1 " + (rstate.R1 ? "on":"")} />
             <div className={"heater h2 " + (rstate.R2 ? "on":"")} />
