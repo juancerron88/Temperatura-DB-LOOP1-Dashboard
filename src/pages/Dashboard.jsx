@@ -143,10 +143,10 @@ export default function Dashboard() {
           <div className="scene">
             <img src="/images/mesa1.jpg" alt="top view" className="scene-img" />
 
-            <TempBadge x="10%" y="46%" label="K1" value={curr.K1} />
-            <TempBadge x="27%" y="46%" label="K2" value={curr.K2} />
-            <TempBadge x="68%" y="46%" label="K3" value={curr.K3} />
-            <TempBadge x="85%" y="46%" label="K4" value={curr.K4} />
+            <TempBadge x="20%" y="45%" label="K1" value={curr.K1} />
+            <TempBadge x="20%" y="75%" label="K2" value={curr.K2} />
+            <TempBadge x="78%" y="45%" label="K3" value={curr.K3} />
+            <TempBadge x="78%" y="75%" label="K4" value={curr.K4} />
 
             <div className={"heater h1 " + (rstate.R1 ? "on":"")} />
             <div className={"heater h2 " + (rstate.R2 ? "on":"")} />
@@ -176,10 +176,10 @@ export default function Dashboard() {
         <div className="card big">
           <div className="scene">
             <img src="/images/mesa2.jpg" alt="3d view" className="scene-img" />
-            <TempBadge x="25%" y="22%" label="K5" value={curr.K5} />
-            <TempBadge x="61%" y="22%" label="K6" value={curr.K6} />
-            <TempBadge x="58%" y="64%" label="K7" value={curr.K7} />
-            <TempBadge x="86%" y="64%" label="K8" value={curr.K8} />
+            <TempBadge x="35%" y="15%" label="K5" value={curr.K5} />
+            <TempBadge x="64%" y="5%" label="K6" value={curr.K6} />
+            <TempBadge x="73%" y="85%" label="K7" value={curr.K7} />
+            <TempBadge x="86%" y="75%" label="K8" value={curr.K8} />
             <div className={"fan f1 " + (rstate.R3 ? "on":"")} />
             <div className={"fan f2 " + (rstate.R3 ? "on":"")} />
           </div>
