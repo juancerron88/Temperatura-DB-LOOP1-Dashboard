@@ -18,18 +18,19 @@ export default function useThermoData(deviceId, limit = 800) {
   });
   const [rstate, setRstate]   = useState({ R1:false, R2:false, R3:false });
 
-  // ====== loaders ======
+  /* ========= Loaders ========= */
   const refreshSensors = useCallback(async () => {
     try {
       const s = await getSensors(deviceId);
-      setSensors(s);
-      // activa todo por defecto la primera vez
-      const init = {}; s.forEach(k => init[k] = true);
-      setActive(a => (Object.keys(a).length ? a : {
-        ...init, PV1:true, PV2:true, SP1:true, SP2:true
-      }));
+      setSensors(s || []);
+      // activa todo la 1.ª vez
+      if (!Object.keys(active).length) {
+        const init = {};
+        (s || []).forEach(k => init[k] = true);
+        setActive({ ...init, PV1:true, PV2:true, SP1:true, SP2:true });
+      }
     } catch {}
-  }, [deviceId]);
+  }, [deviceId]); // eslint-disable-line
 
   const refreshLatest = useCallback(async () => {
     try { setLatest(await getLatest(deviceId)); } catch {}
@@ -47,20 +48,16 @@ export default function useThermoData(deviceId, limit = 800) {
     try { setCtrl(await getControl(deviceId)); } catch {}
   }, [deviceId]);
 
-  // lee estado real (válido para AUTO y MANUAL)
+  // Estado real de relés (sirve para AUTO y MANUAL)
   const refreshRelays = useCallback(async () => {
     try {
-      // si tienes /api/relay/:deviceId usa getRelayStatus; si no, conserva getRelayState
       const doc = await getRelayStatus(deviceId).catch(() => null);
-      const source = doc?.relays
-        ? doc
-        : await getRelayState(deviceId).catch(() => null);
-
-      const rel = source && source.relays ? source.relays : {};
+      const source = doc?.relays ? doc : await getRelayState(deviceId).catch(() => null);
+      const rel = source?.relays || {};
       setRstate({
-        R1: !!(rel.R1 && rel.R1.state),
-        R2: !!(rel.R2 && rel.R2.state),
-        R3: !!(rel.R3 && rel.R3.state)
+        R1: !!rel.R1?.state,
+        R2: !!rel.R2?.state,
+        R3: !!rel.R3?.state
       });
     } catch {}
   }, [deviceId]);
@@ -75,7 +72,7 @@ export default function useThermoData(deviceId, limit = 800) {
       refreshSummary(),
       refreshControl(),
       refreshRelays()
-    ]).finally(() => setStatus("ok"));
+    ]).finally(()=>setStatus("ok"));
 
     const t = setInterval(() => {
       refreshLatest();
@@ -86,9 +83,11 @@ export default function useThermoData(deviceId, limit = 800) {
     return () => clearInterval(t);
   }, [deviceId, refreshSensors, refreshLatest, refreshHistory, refreshSummary, refreshControl, refreshRelays]);
 
-  // ====== valores actuales por sensor (para badges) ======
+  /* ========= Valores actuales por sensor =========
+     - Toma la primera lectura válida por sensor (como vienen DESC)
+     - PV1 = avg(K1..K4) y PV2 = avg(K5..K6) aunque no coincidan en el mismo TS
+  */
   const curr = useMemo(() => {
-    // rows viene DESC; para cada sensor toma la PRIMERA aparición
     const map = {};
     for (const r of rows) {
       const s = r?.meta?.sensor;
@@ -97,25 +96,14 @@ export default function useThermoData(deviceId, limit = 800) {
         map[s] = Number(r.celsius);
       }
     }
-    // PV1/PV2 del último instante disponible
-    const lastAsc = [...rows].reverse();
-    const lastTs = lastAsc[lastAsc.length-1]?.createdAt;
-    if (lastTs) {
-      // recolecta valores en ese ts
-      const bucket = lastAsc.filter(x => x.createdAt === lastTs);
-      const v = (k) => {
-        const item = bucket.find(b => b.meta?.sensor === k);
-        return Number.isFinite(item?.celsius) ? Number(item.celsius) : null;
-      };
-      const p1 = avg([v("K1"), v("K2"), v("K3"), v("K4")]);
-      const p2 = avg([v("K5"), v("K6")]);
-      if (Number.isFinite(p1)) map.PV1 = p1;
-      if (Number.isFinite(p2)) map.PV2 = p2;
-    }
-    return map; // {K1:xx, ..., PV1:xx, PV2:xx}
+    const p1 = avg([map.K1, map.K2, map.K3, map.K4]);
+    const p2 = avg([map.K5, map.K6]);
+    if (Number.isFinite(p1)) map.PV1 = p1;
+    if (Number.isFinite(p2)) map.PV2 = p2;
+    return map; // {K1:.., K2:.., ..., PV1:.., PV2:..}
   }, [rows]);
 
-  // ====== datos para gráficas (ASC) con PV/SP ======
+  /* ========= Datos para gráficas (ASC) con PV/SP ========= */
   const chartData = useMemo(() => {
     const asc = [...rows].reverse();
     return asc.map(r => ({
@@ -144,7 +132,7 @@ export default function useThermoData(deviceId, limit = 800) {
     active, setActive,
     chartData, curr,
     ctrl, setCtrl, refreshControl,
-    rstate, setRstate, refreshRelays,
+    rstate, refreshRelays,
   };
 }
 

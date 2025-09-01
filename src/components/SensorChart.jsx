@@ -8,11 +8,11 @@ import {
 
 export default function SensorChart({
   chartData,
-  sensors,                 // ej ["K1","K2","PV1","SP1"]
-  active, setActive,       // objeto {K1:true,...} + setter
-  colors                   // mapa de colores
+  sensors,
+  active, setActive,
+  colors
 }) {
-  const [rangeMin, setRangeMin] = useState(60); // 1h por defecto
+  const [rangeMin, setRangeMin] = useState(60);
 
   const filtered = useMemo(() => {
     if (!chartData?.length) return [];
@@ -60,9 +60,8 @@ export default function SensorChart({
               key={m}
               className={"rng " + (rangeMin===m ? "is-active" : "")}
               onClick={() => setRangeMin(m)}
-              title={`últimos ${m} min`}
             >
-              {labelRange(m)}
+              {m<60 ? `${m}m` : m===60 ? "1h" : m===360 ? "6h" : "24h"}
             </button>
           ))}
         </div>
@@ -88,7 +87,7 @@ export default function SensorChart({
                 type="monotone"
                 dataKey={s}
                 name={s}
-                stroke={colors?.[s] || COLORS_FALLBACK[i % COLORS_FALLBACK.length]}
+                stroke={colors?.[s] || FALL[i % FALL.length]}
                 strokeWidth={2}
                 dot={false}
                 isAnimationActive={false}
@@ -102,9 +101,7 @@ export default function SensorChart({
   );
 }
 
-const labelRange = (m) => (m<60 ? `${m}m` : m===60 ? "1h" : m===360 ? "6h" : "24h");
-
-const COLORS_FALLBACK = [
+const FALL = [
   "#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd",
   "#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"
 ];

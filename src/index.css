@@ -1,76 +1,56 @@
-/* src/index.css — estilos base + responsive */
+/* src/index.css */
 
 :root {
   --bg: #1e5166;
   --card: #1f5e75;
-  --card-alt: #1b4e62;
   --text: #f2f6f9;
   --pill: #e8f3fb;
   --ok: #3cb371;
   --bad: #e74c3c;
 }
 
-html, body, #root {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  box-sizing: border-box;
-}
-
-* { box-sizing: inherit; }
+html, body, #root { height: 100%; background: var(--bg); color: var(--text); }
+* { box-sizing: border-box; }
 .mt0 { margin-top: 0; }
 
-/* Header */
-.hdr {
-  display: flex; gap: 16px; align-items: center; padding: 18px 22px; flex-wrap: wrap;
-}
+/* ===== Header limpio ===== */
+.hdr { padding: 14px 22px; display: flex; flex-direction: column; gap: 10px; }
 .hdr h1 { margin: 0; font-size: 28px; font-weight: 800; }
-.chips { display: flex; gap: 8px; align-items: center; }
+.hdr-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.chip-group { display: flex; gap: 8px; align-items: center; }
 .chip { background:#153c4c; padding: 6px 10px; border-radius: 10px; font-size: 13px; }
 .chip-input { background:#153c4c; border:1px solid #2c7b94; color:#fff; padding:6px 10px; border-radius:10px; min-width:160px; }
 .chip-link { margin-left:auto; background:#153c4c; padding:8px 12px; border-radius:10px; color:#fff; text-decoration:none; }
-.pill { background: var(--pill); color:#123 !important; }
+.mode { display:flex; gap:6px; }
+.mode-btn { border:1px solid #2c7b94; background:#153c4c; color:#fff; border-radius:10px; padding:6px 12px; cursor:pointer; }
+.mode-btn.is-on { background: var(--ok); border-color: var(--ok); }
 
-/* Cards */
-.card {
-  background: var(--card);
-  border: 2px solid #1b4e62;
-  border-radius: 12px;
-  padding: 14px;
-  color: #f2f6f9;
-}
+/* ===== Cards y grids ===== */
+.card { background: var(--card); border: 2px solid #1b4e62; border-radius: 12px; padding: 14px; color: var(--text); }
 .card-title { font-weight: 700; margin-bottom: 8px; }
 .card.big { position: relative; padding-bottom: 70px; }
 
-/* Grids */
-.top-grid, .mid-grid, .bot-grid {
-  display: grid; gap: 18px; padding: 0 22px 18px;
-}
+.top-grid, .mid-grid, .bot-grid { display: grid; gap: 18px; padding: 0 22px 18px; }
 .top-grid { grid-template-columns: 1fr 1fr; }
 .mid-grid { grid-template-columns: 1fr 1fr; }
 .bot-grid { grid-template-columns: 1fr 1fr; }
 
-/* Campos */
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.field { display: grid; grid-template-columns: 1fr; gap: 4px; }
-.field span { font-size: 12px; opacity: .85; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.field { display: grid; gap: 4px; position: relative; }
+.field > span { font-size: 12px; opacity: .85; }
 .in { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2c7b94; background: #153c4c; color: #fff; }
 .in.ro { opacity: .8; }
-.unit { position: absolute; right: 10px; top: 34px; font-size: 12px; opacity: .6; }
+.unit { position: absolute; right: 10px; top: 33px; font-size: 12px; opacity: .6; }
 .btn { background:#1ea45a; border:0; color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; }
 
-/* Escenas + badges */
+/* ===== Scene + badges ===== */
 .scene { position: relative; overflow: hidden; border-radius: 10px; }
 .scene-img { width: 100%; height: auto; display: block; opacity: .98; }
 
 .badge {
   position: absolute;
   transform: translate(-50%, -50%);
-  background: #e8f3fb;
+  background: var(--pill);
   color: #1c2a32;
   border-radius: 10px;
   padding: 6px 10px;
@@ -81,11 +61,12 @@ html, body, #root {
 .badge .btext { font-size: 12px; font-weight: 700; }
 .badge .bval  { font-size: 12px; opacity: .8; }
 
-/* Manual box */
+/* ===== Manual box ===== */
 .manual-box {
   position: absolute; right: 14px; top: 14px;
-  border: 2px solid #cde2f0; border-radius: 12px; padding: 12px 14px;
-  width: 220px; background: rgba(0,0,0,.18);
+  border: 2px solid #cde2f0; border-radius: 12px;
+  padding: 12px 14px; width: 220px;
+  background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
 }
 .rrow { display:flex; align-items:center; gap:8px; margin:8px 0; }
 .rname { width: 90px; }
@@ -95,11 +76,11 @@ html, body, #root {
 .pill-btn.is-on { background: var(--ok); }
 .pill-btn.is-off { background: var(--bad); }
 
-/* Under status */
+/* ===== Under info ===== */
 .under { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
 .pill-line { background:#153c4c; border:1px solid #2c7b94; padding:6px 10px; border-radius:999px; font-size:12px; }
 
-/* Charts */
+/* ===== Charts ===== */
 .chart-wrap { width:100%; }
 .chart-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
 .chk { display:flex; align-items:center; gap:6px; margin-right:8px; font-size:12px; }
@@ -109,16 +90,40 @@ html, body, #root {
 
 .api-foot { font-size: 12px; opacity: .75; padding: 0 22px 14px; }
 
+/* ===== Animaciones ===== */
+/* Resistencias (glow + pulso) - ajusta posiciones a tu imagen top-view */
+.heater { position:absolute; width:10%; height:48%; left:0; top:0; border-radius:8px; pointer-events:none; opacity:.0; }
+.heater.on { animation: heatGlow 1.2s infinite ease-in-out; opacity: .85; }
+.h1 { left: 31%; top: 33%; }  /* barra izquierda */
+.h2 { left: 57%; top: 33%; }  /* barra derecha */
+
+@keyframes heatGlow {
+  0% { box-shadow: 0 0 8px 2px rgba(255,120,0,.4); background: rgba(255,140,0,.25); }
+  50%{ box-shadow: 0 0 18px 6px rgba(255,80,0,.65); background: rgba(255,100,0,.35); }
+  100%{ box-shadow: 0 0 8px 2px rgba(255,120,0,.4); background: rgba(255,140,0,.25); }
+}
+
+/* Ventiladores (círculo con “aspas” rotando) – ajusta posiciones */
+.fan { position:absolute; width:48px; height:48px; border-radius:50%; border:3px solid rgba(255,255,255,.4); top: 16%; background: transparent; }
+.f1 { left: 44%; } /* primer ventilador */
+.f2 { left: 62%; } /* segundo ventilador */
+.fan::before, .fan::after {
+  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:34px; height:6px; background: rgba(255,255,255,.7); border-radius: 6px;
+}
+.fan::after { transform:translate(-50%,-50%) rotate(90deg); }
+.fan.on { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .top-grid, .mid-grid, .bot-grid { grid-template-columns: 1fr; }
   .manual-box { position: static; width: 100%; margin-top: 10px; }
   .card.big { padding-bottom: 14px; }
+  .chip-link { margin-left: 0; }
 }
 @media (max-width: 640px) {
   .hdr { padding: 12px; }
-  .chips { width: 100%; }
-  .chip-link { width: 100%; text-align: center; }
   .grid3 { grid-template-columns: 1fr; }
   .badge { min-width: 64px; }
 }
