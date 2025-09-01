@@ -22,9 +22,7 @@ export const getLatest = (deviceId) =>
 
 export const getHistory = (deviceId, limit = 500) =>
   fetch(
-    `${BASE}/api/thermo/history?deviceId=${encodeURIComponent(
-      deviceId
-    )}&limit=${limit}`,
+    `${BASE}/api/thermo/history?deviceId=${encodeURIComponent(deviceId)}&limit=${limit}`,
     { headers: auth() }
   ).then((r) => parse(r, "GET", "/api/thermo/history"));
 
@@ -35,9 +33,7 @@ export const getSensors = (deviceId) =>
 
 export const getSummary = (deviceId, windowSec = 600) =>
   fetch(
-    `${BASE}/api/thermo/summary?deviceId=${encodeURIComponent(
-      deviceId
-    )}&windowSec=${windowSec}`,
+    `${BASE}/api/thermo/summary?deviceId=${encodeURIComponent(deviceId)}&windowSec=${windowSec}`,
     { headers: auth() }
   ).then((r) => parse(r, "GET", "/api/thermo/summary"));
 
@@ -54,11 +50,14 @@ export const setRelay = (deviceId, relayId, { state, holdSec }) =>
     body: JSON.stringify({ deviceId, relay: relayId, state, holdSec }),
   }).then((r) => parse(r, "POST", "/api/relay/set"));
 
-/* ---------- RELAY (ESTADO REAL AUTO + MANUAL) ---------- */
+/* ---------- RELAY (ESTADO REAL: AUTO + MANUAL) ---------- */
+// Aquí consultamos siempre el estado real de los relés
+// Ejemplo de respuesta esperada del backend:
+// { "deviceId":"heltec-v3-01", "relays": { "R1":{ "state":true }, "R2":{ "state":false }, "R3":{ "state":true } } }
 export const getRelayStatus = (deviceId) =>
-  fetch(`${BASE}/api/relay/status?deviceId=${encodeURIComponent(deviceId)}`, {
+  fetch(`${BASE}/api/relay/${encodeURIComponent(deviceId)}`, {
     headers: auth(),
-  }).then((r) => parse(r, "GET", "/api/relay/status"));
+  }).then((r) => parse(r, "GET", "/api/relay/:deviceId"));
 
 /* ---------- CONTROL (AUTO/MANUAL + SP/H + duty) ---------- */
 export const getControl = (deviceId) =>

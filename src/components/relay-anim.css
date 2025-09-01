@@ -1,0 +1,80 @@
+/* src/components/relay-anim.css */
+
+/* ===== HEATER (R1, R2) ===== */
+.heater {
+  position: absolute;
+  background: linear-gradient(to bottom, rgba(255,120,0,0.15), rgba(255,120,0,0.15));
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 rgba(255,120,0,0), 0 0 0 rgba(255,120,0,0);
+  overflow: hidden;
+  transition: box-shadow .2s ease, background .2s ease;
+}
+.heater.on {
+  background: linear-gradient(to bottom, rgba(255,120,0,0.24), rgba(255,60,0,0.20));
+  box-shadow: inset 0 0 18px rgba(255,130,0,.55), 0 0 14px rgba(255,90,0,.35);
+}
+.heat-wave {
+  position: absolute;
+  left: 0; right: 0;
+  height: 30%;
+  background: radial-gradient(ellipse at center, rgba(255,160,0,.35) 0%, rgba(255,160,0,0) 70%);
+  transform: translateY(100%);
+  opacity: 0;
+}
+.heater.on .heat-wave {
+  animation: rise 1.8s infinite ease-in;
+}
+.heater.on .wave2 { animation-delay: .4s; }
+.heater.on .wave3 { animation-delay: .8s; }
+
+@keyframes rise {
+  0%   { transform: translateY(120%); opacity: 0; }
+  30%  { opacity: .9; }
+  100% { transform: translateY(-120%); opacity: 0; }
+}
+
+/* ===== FAN (R3) ===== */
+.fan {
+  position: absolute;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.1);
+  display: grid; place-items: center;
+}
+.fan .hub {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #222;
+}
+.fan .blade {
+  position: absolute;
+  width: 8px; height: 24px; border-radius: 4px;
+  background: #111;
+  transform-origin: 50% 80%;
+}
+.fan .b1 { transform: rotate(0deg) translateY(-18px); }
+.fan .b2 { transform: rotate(120deg) translateY(-18px); }
+.fan .b3 { transform: rotate(240deg) translateY(-18px); }
+.fan.on {
+  animation: spin .8s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== LED estado ===== */
+.led {
+  width: 10px; height: 10px; border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(0,0,0,.0);
+}
+.led.on {
+  background: #23d160; box-shadow: 0 0 10px 2px rgba(35,209,96,.7);
+}
+.led.off {
+  background: #ff3860; box-shadow: 0 0 10px 2px rgba(255,56,96,.6);
+}
+
+/* Responsivo pequeño */
+@media (max-width: 768px) {
+  .fan { width: 44px; height: 44px; }
+}
