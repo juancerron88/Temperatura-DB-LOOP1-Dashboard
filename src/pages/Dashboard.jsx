@@ -261,7 +261,6 @@ function NumField({ label, value, onCommit }) {
       prevRef.current = v;
       setText(String(v));
     } else {
-      // Revertir si no es válido
       setText(prevRef.current === "" ? "" : String(prevRef.current));
     }
     setEditing(false);
@@ -270,18 +269,22 @@ function NumField({ label, value, onCommit }) {
   return (
     <label className="field">
       <span>{label}</span>
+      {/* permite vacío mientras escribes */}
       <input
         className="in"
         inputMode="decimal"
         value={text}
-        onFocus={()=>setEditing(true)}
-        onChange={(e)=>setText(e.target.value)}   {/* permite vacío mientras escribes */}
+        onFocus={() => setEditing(true)}
+        onChange={(e) => setText(e.target.value)}
         onBlur={commit}
-        onKeyDown={(e)=>{ if (e.key === "Enter") { e.currentTarget.blur(); } }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
       />
     </label>
   );
 }
+
 
 function RelayRow({ name, subtitle, on, onClick, offClick }) {
   return (
