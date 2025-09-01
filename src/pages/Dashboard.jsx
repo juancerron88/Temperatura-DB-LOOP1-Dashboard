@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import useThermoData from "../hooks/useThermoData";
 import { setControl, setRelay } from "../services/api";
 import SensorChart from "../components/SensorChart";
@@ -90,12 +90,28 @@ export default function Dashboard() {
           <div className="card-title">PV1 <small>(promedio de K1 al K4)</small></div>
           <div className="grid3">
             <ScadaField label="PV1" value={curr.PV1} />
-            <NumField label="Tiempo ON (min)" value={msToMin(ctrl.l1_on_ms)} onChange={(v)=>setCtrl(p=>({...p, l1_on_ms: minToMs(v)}))} />
+            <NumField
+              label="Tiempo ON (min)"
+              value={msToMin(ctrl.l1_on_ms)}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, l1_on_ms: minToMs(v)}))}
+            />
             <div />
-            <NumField label="SP1 (°C)" value={ctrl.sp1} onChange={(v)=>setCtrl(p=>({...p, sp1: v}))} />
-            <NumField label="Tiempo OFF (min)" value={msToMin(ctrl.l1_off_ms)} onChange={(v)=>setCtrl(p=>({...p, l1_off_ms: minToMs(v)}))} />
+            <NumField
+              label="SP1 (°C)"
+              value={ctrl.sp1}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, sp1: v}))}
+            />
+            <NumField
+              label="Tiempo OFF (min)"
+              value={msToMin(ctrl.l1_off_ms)}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, l1_off_ms: minToMs(v)}))}
+            />
             <button className="btn" onClick={saveControl}>Aplicar</button>
-            <NumField label="H1 (°C)" value={ctrl.h1} onChange={(v)=>setCtrl(p=>({...p, h1: v}))} />
+            <NumField
+              label="H1 (°C)"
+              value={ctrl.h1}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, h1: v}))}
+            />
           </div>
         </div>
 
@@ -104,10 +120,18 @@ export default function Dashboard() {
           <div className="grid3">
             <ScadaField label="PV2" value={curr.PV2} />
             <div /><div />
-            <NumField label="SP2 (°C)" value={ctrl.sp2} onChange={(v)=>setCtrl(p=>({...p, sp2: v}))} />
+            <NumField
+              label="SP2 (°C)"
+              value={ctrl.sp2}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, sp2: v}))}
+            />
             <div />
             <button className="btn" onClick={saveControl}>Aplicar</button>
-            <NumField label="H2 (°C)" value={ctrl.h2} onChange={(v)=>setCtrl(p=>({...p, h2: v}))} />
+            <NumField
+              label="H2 (°C)"
+              value={ctrl.h2}
+              onCommit={(v)=>Number.isFinite(v) && setCtrl(p=>({...p, h2: v}))}
+            />
           </div>
         </div>
       </section>
@@ -119,13 +143,11 @@ export default function Dashboard() {
           <div className="scene">
             <img src="/images/mesa1.jpg" alt="top view" className="scene-img" />
 
-            {/* Badges */}
             <TempBadge x="10%" y="46%" label="K1" value={curr.K1} />
             <TempBadge x="27%" y="46%" label="K2" value={curr.K2} />
             <TempBadge x="68%" y="46%" label="K3" value={curr.K3} />
             <TempBadge x="85%" y="46%" label="K4" value={curr.K4} />
 
-            {/* Animaciones de nicrom (aprox posiciones) */}
             <div className={"heater h1 " + (rstate.R1 ? "on":"")} />
             <div className={"heater h2 " + (rstate.R2 ? "on":"")} />
           </div>
@@ -154,13 +176,10 @@ export default function Dashboard() {
         <div className="card big">
           <div className="scene">
             <img src="/images/mesa2.jpg" alt="3d view" className="scene-img" />
-
             <TempBadge x="25%" y="22%" label="K5" value={curr.K5} />
             <TempBadge x="61%" y="22%" label="K6" value={curr.K6} />
             <TempBadge x="58%" y="64%" label="K7" value={curr.K7} />
             <TempBadge x="86%" y="64%" label="K8" value={curr.K8} />
-
-            {/* Ventiladores (arriba) */}
             <div className={"fan f1 " + (rstate.R3 ? "on":"")} />
             <div className={"fan f2 " + (rstate.R3 ? "on":"")} />
           </div>
@@ -220,14 +239,50 @@ function ScadaField({ label, value }) {
     </label>
   );
 }
-function NumField({ label, value, onChange }) {
+
+/* =========== INPUT NUMÉRICO “AMABLE” =========== */
+function NumField({ label, value, onCommit }) {
+  const [text, setText] = useState(value ?? "");
+  const [editing, setEditing] = useState(false);
+  const prevRef = useRef(value ?? "");
+
+  // Si no estamos editando, sincroniza con valor externo
+  useEffect(() => {
+    if (!editing) {
+      setText(value ?? "");
+      prevRef.current = value ?? "";
+    }
+  }, [value, editing]);
+
+  const commit = () => {
+    const v = parseFloat(text);
+    if (Number.isFinite(v)) {
+      onCommit?.(v);
+      prevRef.current = v;
+      setText(String(v));
+    } else {
+      // Revertir si no es válido
+      setText(prevRef.current === "" ? "" : String(prevRef.current));
+    }
+    setEditing(false);
+  };
+
   return (
     <label className="field">
       <span>{label}</span>
-      <input className="in" type="number" value={value ?? ""} onChange={(e)=>onChange?.(parseFloat(e.target.value))} />
+      <input
+        className="in"
+        inputMode="decimal"
+        value={text}
+        onFocus={()=>setEditing(true)}
+        onChange={(e)=>setText(e.target.value)}   {/* permite vacío mientras escribes */}
+        onBlur={commit}
+        onKeyDown={(e)=>{ if (e.key === "Enter") { e.currentTarget.blur(); } }}
+      />
     </label>
   );
 }
+
 function RelayRow({ name, subtitle, on, onClick, offClick }) {
   return (
     <div className="rrow">
