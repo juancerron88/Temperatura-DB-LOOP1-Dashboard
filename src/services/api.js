@@ -99,6 +99,14 @@ export const setControl = (deviceId, payload) =>
     body: JSON.stringify({ deviceId: deviceId || DEF_ID, ...payload }),
   }).then((r) => parse(r, "PUT", "/api/control"));
 
+  // src/services/api.js
+export const getLatestBySensor = (deviceId, sensor) =>
+  safeFetch(
+    `${BASE}/api/thermo/latest?deviceId=${encodeURIComponent(deviceId || DEF_ID)}&sensor=${encodeURIComponent(sensor)}`,
+    { headers: auth() }
+  ).then(r => parse(r, "GET", "/api/thermo/latest?sensor"));
+
+
 /* ---------- Utilidades opcionales ---------- */
 export const apiBase   = BASE;   // por si quieres mostrarlo en el footer
 export const apiHasKey = !!KEY;

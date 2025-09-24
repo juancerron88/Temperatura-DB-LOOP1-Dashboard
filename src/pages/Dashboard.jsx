@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import useThermoData from "../hooks/useThermoData";
 import { setControl, setRelay } from "../services/api";
 import SensorChart from "../components/SensorChart";
+import HousePanel from "../components/HousePanel";
 
 /* Paleta */
 const C = {
@@ -199,6 +200,11 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+      {/* ...donde quieras mostrar la casa... */}
+      <section className="card p-3">
+        <h3 style={{marginBottom:8}}>Temperatura de la Casa</h3>
+        <HousePanel deviceId={deviceId} />
+      </section>
 
       {/* Gráficas */}
       <section className="bot-grid">
@@ -221,7 +227,7 @@ export default function Dashboard() {
           />
         </div>
       </section>
-
+      
       <footer className="api-foot">
         API: {import.meta.env.VITE_API_BASE}
       </footer>

@@ -30,3 +30,24 @@ button:disabled { opacity:.6; cursor:default; }
 .error { color: var(--alarm); margin-bottom:8px; }
 .legend { display:flex; gap:12px; flex-wrap:wrap; font-size: 14px; color: var(--muted); }
 .legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+
+/* src/pages/dashboard.css (o App.css) */
+.house-wrap { position: relative; width: 100%; max-width: 640px; margin: 0 auto; }
+.house-img  { width: 100%; height: auto; display: block; border-radius: 10px; }
+.badge {
+  position: absolute; min-width: 120px; padding: 8px 10px;
+  background: rgba(0,0,0,.6); color: #fff; border: 2px solid #888;
+  border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.25); backdrop-filter: blur(2px);
+}
+.badge .b-title { font-size: .8rem; opacity: .85; }
+.badge .b-temp  { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+.badge .b-hum   { font-size: .85rem; opacity: .85; }
+
+.badge-ext { top: 8%; right: 4%; }   /* ajusta según tu imagen */
+.badge-int { left: 42%; top: 48%; transform: translate(-50%,-50%); }
+
+.legend {
+  margin-top: 8px; display: flex; gap: 14px; align-items: center;
+  justify-content: center; color: #9ca3af; font-size: .85rem;
+}
+.legend .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; margin: 0 6px 0 10px; }
