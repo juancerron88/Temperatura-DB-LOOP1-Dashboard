@@ -1,17 +1,64 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getLatestBySensor, defaultDeviceId } from "../services/api";
 
 const fmt = (v, d = 1) => (Number.isFinite(v) ? v.toFixed(d) : "—");
-const colorByComfort = (t) => {
-  if (!Number.isFinite(t)) return "#888";
-  if (t < 15) return "#3b82f6";     // frío
-  if (t > 25) return "#ef4444";     // calor
-  return "#22c55e";                 // confort
-};
+
+// Guarda/carga posiciones en localStorage
+function useBadgePos(key, defPos) {
+  const [pos, setPos] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(key)) || defPos; }
+    catch { return defPos; }
+  });
+  useEffect(() => { localStorage.setItem(key, JSON.stringify(pos)); }, [key, pos]);
+  return [pos, setPos];
+}
+
+// Etiqueta arrastrable (usa el mismo look de tus badges)
+function DraggableBadge({ edit, containerRef, pos, setPos, label, t, h }) {
+  const onPointerDown = (e) => {
+    if (!edit) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+
+    const move = (ev) => {
+      const x = ((ev.clientX - rect.left) / rect.width) * 100;
+      const y = ((ev.clientY - rect.top) / rect.height) * 100;
+      setPos({
+        x: `${Math.max(0, Math.min(100, x))}%`,
+        y: `${Math.max(0, Math.min(100, y))}%`,
+      });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
+  return (
+    <div
+      className={"badge hb " + (edit ? "is-edit" : "")}
+      style={{ left: pos.x, top: pos.y }}
+      onPointerDown={onPointerDown}
+    >
+      <div className="btext">{label}</div>
+      <div className="bval">{fmt(t)} °C</div>
+      <div className="bhum">{fmt(h, 0)} % HR</div>
+    </div>
+  );
+}
 
 export default function HousePanel({ deviceId = defaultDeviceId }) {
-  const [inD, setInD] = useState(null);   // DHT_INT
-  const [outD, setOutD] = useState(null); // DHT_EXT
+  const [inData, setIn] = useState(null);   // DHT_INT
+  const [outData, setOut] = useState(null); // DHT_EXT
+  const [edit, setEdit] = useState(false);
+  const stageRef = useRef(null);
+
+  // Posiciones (por defecto dentro/fuera). Se guardan por deviceId.
+  const [posInt, setPosInt] = useBadgePos(`house_badge_int_${deviceId}`, { x: "50%", y: "62%" });
+  const [posExt, setPosExt] = useBadgePos(`house_badge_ext_${deviceId}`, { x: "82%", y: "12%" });
 
   useEffect(() => {
     let alive = true;
@@ -21,42 +68,45 @@ export default function HousePanel({ deviceId = defaultDeviceId }) {
         getLatestBySensor(deviceId, "DHT_EXT"),
       ]);
       if (!alive) return;
-      setInD(i || null);
-      setOutD(o || null);
+      setIn(i || null);
+      setOut(o || null);
     };
     tick();
     const id = setInterval(tick, 3000);
     return () => { alive = false; clearInterval(id); };
   }, [deviceId]);
 
-  const ti = inD?.celsius, hi = inD?.meta?.humidity;
-  const te = outD?.celsius, he = outD?.meta?.humidity;
-
   return (
-    <div className="house-wrap card p-3">
-      <h3 className="mb-2">Temperatura de la Casa</h3>
-      <div className="house-stage">
-        <img className="house-img" src="/images/house.png" alt="Casa" />
-        {/* Exterior */}
-        <div className="house-badge house-badge-ext" style={{borderColor: colorByComfort(te)}}>
-          <div className="b-title">Exterior</div>
-          <div className="b-temp">{fmt(te)}°C</div>
-          <div className="b-hum">{fmt(he,0)}% HR</div>
-        </div>
-        {/* Interior */}
-        <div className="house-badge house-badge-int" style={{borderColor: colorByComfort(ti)}}>
-          <div className="b-title">Interior</div>
-          <div className="b-temp">{fmt(ti)}°C</div>
-          <div className="b-hum">{fmt(hi,0)}% HR</div>
-        </div>
+    <div className="house-wrap">
+      <div className="house-controls">
+        <button className={"btn " + (edit ? "is-on" : "")} onClick={() => setEdit(v => !v)}>
+          {edit ? "Terminar" : "Mover etiquetas"}
+        </button>
       </div>
 
-      <div className="house-legend">
-        <span className="dot" style={{background:"#3b82f6"}} /> &lt; 15°C
-        <span className="dot" style={{background:"#22c55e"}} /> 15–25°C
-        <span className="dot" style={{background:"#ef4444"}} /> &gt; 25°C
+      <div className="house-stage" ref={stageRef}>
+        <img src="/images/house.png" alt="Casa" className="house-img" />
+
+        <DraggableBadge
+          edit={edit}
+          containerRef={stageRef}
+          pos={posExt}
+          setPos={setPosExt}
+          label="Exterior"
+          t={outData?.celsius}
+          h={outData?.meta?.humidity}
+        />
+
+        <DraggableBadge
+          edit={edit}
+          containerRef={stageRef}
+          pos={posInt}
+          setPos={setPosInt}
+          label="Interior"
+          t={inData?.celsius}
+          h={inData?.meta?.humidity}
+        />
       </div>
     </div>
   );
 }
-
