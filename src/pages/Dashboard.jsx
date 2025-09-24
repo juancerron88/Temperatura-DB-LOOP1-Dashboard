@@ -25,7 +25,8 @@ export default function Dashboard() {
     active, setActive,
     chartData, curr,
     ctrl, setCtrl, refreshControl,
-    rstate, refreshRelays
+    rstate, refreshRelays,
+    l2,                 // ⬅️ meta del lazo 2 (hotEnough, batteryReady, outAvg)
   } = useThermoData(deviceId);
 
   const saveControl = async () => {
@@ -117,7 +118,7 @@ export default function Dashboard() {
         </div>
 
         <div className="card">
-          <div className="card-title">PV2 <small>(promedio de K5 al K6)</small></div>
+          <div className="card-title">PV2 <small>(interior – DHT_INT)</small></div>
           <div className="grid3">
             <ScadaField label="PV2" value={curr.PV2} />
             <div /><div />
@@ -194,16 +195,27 @@ export default function Dashboard() {
           </div>
 
           <div className="under">
-            <span className="pill-line">Lazo 2 (K5..K6 → R3)</span>
+            <span className="pill-line">Lazo 2 (Casa DHT_INT → R3)</span>
             <span className="pill-line">SP2/H2: {n(ctrl.sp2)} / {n(ctrl.h2)} °C</span>
             <span className="pill-line">R3 {rstate.R3?"ON":"OFF"}</span>
+            {/* Flags informativos del lazo 2 si vienen del backend */}
+            {typeof l2?.hotEnough === "boolean" && (
+              <span className="pill-line">{l2.hotEnough ? "Salida ≥ 50 °C" : "Salida < 50 °C"}</span>
+            )}
+            {typeof l2?.batteryReady === "boolean" && (
+              <span className="pill-line">{l2.batteryReady ? "Batería lista" : "Batería no lista"}</span>
+            )}
+            {Number.isFinite(l2?.outAvg) && (
+              <span className="pill-line">OutAvg {l2.outAvg.toFixed(1)} °C</span>
+            )}
           </div>
         </div>
       </section>
-      {/* ...donde quieras mostrar la casa... */}
+
+      {/* Casa: badges arrastrables + humedad */}
       <section className="card p-3">
         <h3 style={{marginBottom:8}}>Temperatura de la Casa</h3>
-        <HousePanel deviceId={deviceId} />
+        <HousePanel deviceId={deviceId} curr={curr} l2={l2} />
       </section>
 
       {/* Gráficas */}
@@ -290,7 +302,6 @@ function NumField({ label, value, onCommit }) {
     </label>
   );
 }
-
 
 function RelayRow({ name, subtitle, on, onClick, offClick }) {
   return (

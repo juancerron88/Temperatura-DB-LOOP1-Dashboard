@@ -1,3 +1,4 @@
+// src/components/HousePanel.jsx
 import { useEffect, useRef, useState } from "react";
 import { getLatestBySensor, defaultDeviceId } from "../services/api";
 
@@ -19,8 +20,9 @@ function DraggableBadge({ edit, containerRef, pos, setPos, label, t, h }) {
     if (!edit) return;
     const el = containerRef.current;
     if (!el) return;
-    const rect = el.getBoundingClientRect();
+    e.preventDefault();
 
+    const rect = el.getBoundingClientRect();
     const move = (ev) => {
       const x = ((ev.clientX - rect.left) / rect.width) * 100;
       const y = ((ev.clientY - rect.top) / rect.height) * 100;
@@ -50,16 +52,23 @@ function DraggableBadge({ edit, containerRef, pos, setPos, label, t, h }) {
   );
 }
 
-export default function HousePanel({ deviceId = defaultDeviceId }) {
-  const [inData, setIn] = useState(null);   // DHT_INT
+/**
+ * Props:
+ * - deviceId?: string (default: .env)
+ * - curr?: { DHT_INT, DHT_EXT, PV2? }  // si vienes del hook useThermoData
+ * - l2?:   { hotEnough, batteryReady, outAvg } // flags del lazo 2 (opcional)
+ */
+export default function HousePanel({ deviceId = defaultDeviceId, curr, l2 = {} }) {
+  const [inData, setIn] = useState(null);   // DHT_INT (usa para humedad y fallback de temp)
   const [outData, setOut] = useState(null); // DHT_EXT
   const [edit, setEdit] = useState(false);
   const stageRef = useRef(null);
 
   // Posiciones (por defecto dentro/fuera). Se guardan por deviceId.
-  const [posInt, setPosInt] = useBadgePos(`house_badge_int_${deviceId}`, { x: "50%", y: "62%" });
-  const [posExt, setPosExt] = useBadgePos(`house_badge_ext_${deviceId}`, { x: "82%", y: "12%" });
+  const [posInt, setPosInt] = useBadgePos(`house_badge_int_${deviceId}`, { x: "58%", y: "58%" });
+  const [posExt, setPosExt] = useBadgePos(`house_badge_ext_${deviceId}`, { x: "10%", y: "15%" });
 
+  // Pull periódico SOLO para humedad (y como fallback de temperatura)
   useEffect(() => {
     let alive = true;
     const tick = async () => {
@@ -72,9 +81,17 @@ export default function HousePanel({ deviceId = defaultDeviceId }) {
       setOut(o || null);
     };
     tick();
-    const id = setInterval(tick, 3000);
+    const id = setInterval(tick, 4000);
     return () => { alive = false; clearInterval(id); };
   }, [deviceId]);
+
+  // Temperaturas a mostrar:
+  // - Si llega `curr` desde el hook, usarlo para temp (más fluido)
+  // - Humedad siempre desde el endpoint (inData / outData)
+  const insideTemp  = Number.isFinite(curr?.DHT_INT) ? curr.DHT_INT : inData?.celsius;
+  const outsideTemp = Number.isFinite(curr?.DHT_EXT) ? curr.DHT_EXT : outData?.celsius;
+  const insideHum   = inData?.meta?.humidity;
+  const outsideHum  = outData?.meta?.humidity;
 
   return (
     <div className="house-wrap">
@@ -84,8 +101,8 @@ export default function HousePanel({ deviceId = defaultDeviceId }) {
         </button>
       </div>
 
-      <div className="house-stage" ref={stageRef}>
-        <img src="/images/house.png" alt="Casa" className="house-img" />
+      <div className="scene house-stage" ref={stageRef} style={{ position:"relative", minHeight: 260 }}>
+        <img src="/images/house.png" alt="Casa" className="scene-img house-img" draggable={false} />
 
         <DraggableBadge
           edit={edit}
@@ -93,8 +110,8 @@ export default function HousePanel({ deviceId = defaultDeviceId }) {
           pos={posExt}
           setPos={setPosExt}
           label="Exterior"
-          t={outData?.celsius}
-          h={outData?.meta?.humidity}
+          t={outsideTemp}
+          h={outsideHum}
         />
 
         <DraggableBadge
@@ -103,10 +120,24 @@ export default function HousePanel({ deviceId = defaultDeviceId }) {
           pos={posInt}
           setPos={setPosInt}
           label="Interior"
-          t={inData?.celsius}
-          h={inData?.meta?.humidity}
+          t={insideTemp}
+          h={insideHum}
         />
+
+        {/* Línea de estado del lazo 2 (opcional) */}
+        <div style={{
+          position:"absolute", left: 12, bottom: 12,
+          display:"flex", gap:12, flexWrap:"wrap"
+        }}>
+          {typeof l2.hotEnough    === "boolean" && <Pill ok={!!l2.hotEnough}    text="Salida ≥ 50 °C" />}
+          {typeof l2.batteryReady === "boolean" && <Pill ok={!!l2.batteryReady} text="Batería lista" />}
+          {Number.isFinite(l2.outAvg) && <Pill ok text={`OutAvg ${l2.outAvg.toFixed(1)} °C`} />}
+        </div>
       </div>
     </div>
   );
+}
+
+function Pill({ ok, text }) {
+  return <span className={"pill-line " + (ok ? "" : "dim")}>{text}</span>;
 }

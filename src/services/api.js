@@ -10,14 +10,12 @@ const auth = () => (KEY ? { "x-api-key": KEY } : {});
 
 // Fetch que no rompe la app si BASE no está definido o la red falla
 async function safeFetch(url, init) {
-  // Si no hay BASE configurado devolvemos una “respuesta vacía OK”
   if (!BASE) {
     return { ok: true, json: async () => ({}), text: async () => "" };
   }
   try {
     return await fetch(url, init);
   } catch (e) {
-    // Evita crash del render: simulamos OK vacío
     console.warn("safeFetch error:", e);
     return { ok: true, json: async () => ({}), text: async () => String(e || "") };
   }
@@ -44,6 +42,14 @@ export const getLatest = (deviceId) =>
     `${BASE}/api/thermo/latest?deviceId=${encodeURIComponent(deviceId || DEF_ID)}`,
     { headers: auth() }
   ).then((r) => parse(r, "GET", "/api/thermo/latest"));
+
+export const getLatestSensor = (deviceId, sensor) =>
+  safeFetch(
+    `${BASE}/api/thermo/latest?deviceId=${encodeURIComponent(deviceId || DEF_ID)}&sensor=${encodeURIComponent(sensor)}`,
+    { headers: auth() }
+  ).then((r) => parse(r, "GET", "/api/thermo/latest?sensor"));
+
+export const getLatestBySensor = getLatestSensor; // alias por compatibilidad
 
 export const getHistory = (deviceId, limit = 500) =>
   safeFetch(
@@ -78,12 +84,11 @@ export const setRelay = (deviceId, relayId, { state, holdSec } = {}) =>
   }).then((r) => parse(r, "POST", "/api/relay/set"));
 
 /* ---------- RELAY (ESTADO REAL: AUTO + MANUAL) ---------- */
-/* Esperado: { deviceId, relays: { R1:{state}, R2:{state}, R3:{state} } } */
 export const getRelayStatus = (deviceId) =>
   safeFetch(
-    `${BASE}/api/relay/${encodeURIComponent(deviceId || DEF_ID)}`,
+    `${BASE}/api/relay/status?deviceId=${encodeURIComponent(deviceId || DEF_ID)}`,
     { headers: auth() }
-  ).then((r) => parse(r, "GET", "/api/relay/:deviceId"));
+  ).then((r) => parse(r, "GET", "/api/relay/status"));
 
 /* ---------- CONTROL (AUTO/MANUAL + SP/H + duty) ---------- */
 export const getControl = (deviceId) =>
@@ -98,14 +103,6 @@ export const setControl = (deviceId, payload) =>
     headers: { "Content-Type": "application/json", ...auth() },
     body: JSON.stringify({ deviceId: deviceId || DEF_ID, ...payload }),
   }).then((r) => parse(r, "PUT", "/api/control"));
-
-  // src/services/api.js
-export const getLatestBySensor = (deviceId, sensor) =>
-  safeFetch(
-    `${BASE}/api/thermo/latest?deviceId=${encodeURIComponent(deviceId || DEF_ID)}&sensor=${encodeURIComponent(sensor)}`,
-    { headers: auth() }
-  ).then(r => parse(r, "GET", "/api/thermo/latest?sensor"));
-
 
 /* ---------- Utilidades opcionales ---------- */
 export const apiBase   = BASE;   // por si quieres mostrarlo en el footer

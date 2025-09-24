@@ -17,6 +17,7 @@ export default function useThermoData(deviceId, limit = 800) {
     sp2: 80, h2: 3
   });
   const [rstate, setRstate]   = useState({ R1:false, R2:false, R3:false });
+  const [l2, setL2]           = useState({}); // ⬅️ meta del lazo 2 (pv, outAvg, hotEnough, batteryReady, sp2, h2)
 
   /* ========= Loaders ========= */
   const refreshSensors = useCallback(async () => {
@@ -48,11 +49,21 @@ export default function useThermoData(deviceId, limit = 800) {
     try { setCtrl(await getControl(deviceId)); } catch {}
   }, [deviceId]);
 
-  // Estado real de relés (sirve para AUTO y MANUAL)
+  // Estado real de relés (sirve para AUTO y MANUAL) + lazo 2 extendido
   const refreshRelays = useCallback(async () => {
     try {
       const doc = await getRelayStatus(deviceId).catch(() => null);
-      const source = doc?.relays ? doc : await getRelayState(deviceId).catch(() => null);
+      if (doc?.relays) {
+        setRstate({
+          R1: !!doc.relays.R1?.state,
+          R2: !!doc.relays.R2?.state,
+          R3: !!doc.relays.R3?.state
+        });
+        if (doc.l2) setL2(doc.l2);
+        return;
+      }
+      // Fallback: solo MANUAL/pull
+      const source = await getRelayState(deviceId).catch(() => null);
       const rel = source?.relays || {};
       setRstate({
         R1: !!rel.R1?.state,
@@ -85,7 +96,8 @@ export default function useThermoData(deviceId, limit = 800) {
 
   /* ========= Valores actuales por sensor =========
      - Toma la primera lectura válida por sensor (como vienen DESC)
-     - PV1 = avg(K1..K4) y PV2 = avg(K5..K6) aunque no coincidan en el mismo TS
+     - PV1 = avg(K1..K4)
+     - PV2 = DHT_INT (ya NO promedio de K5..K6)
   */
   const curr = useMemo(() => {
     const map = {};
@@ -97,10 +109,10 @@ export default function useThermoData(deviceId, limit = 800) {
       }
     }
     const p1 = avg([map.K1, map.K2, map.K3, map.K4]);
-    const p2 = avg([map.K5, map.K6]);
+    const p2 = map.DHT_INT; // ⬅️ PV2 ahora es la temp interior (DHT_INT)
     if (Number.isFinite(p1)) map.PV1 = p1;
     if (Number.isFinite(p2)) map.PV2 = p2;
-    return map; // {K1:.., K2:.., ..., PV1:.., PV2:..}
+    return map; // {K1..K8, DHT_INT, DHT_EXT, PV1, PV2}
   }, [rows]);
 
   /* ========= Datos para gráficas (ASC) con PV/SP ========= */
@@ -116,11 +128,11 @@ export default function useThermoData(deviceId, limit = 800) {
       return acc;
     }, []).map(p => {
       const p1 = avg([p.K1, p.K2, p.K3, p.K4]);
-      const p2 = avg([p.K5, p.K6]);
+      const p2 = Number.isFinite(p.DHT_INT) ? p.DHT_INT : null; // ⬅️ PV2 = DHT_INT
       return {
         ...p,
         PV1: Number.isFinite(p1) ? p1 : null,
-        PV2: Number.isFinite(p2) ? p2 : null,
+        PV2: p2,
         SP1: Number.isFinite(ctrl?.sp1) ? ctrl.sp1 : null,
         SP2: Number.isFinite(ctrl?.sp2) ? ctrl.sp2 : null,
       };
@@ -133,6 +145,7 @@ export default function useThermoData(deviceId, limit = 800) {
     chartData, curr,
     ctrl, setCtrl, refreshControl,
     rstate, refreshRelays,
+    l2, // ⬅️ expone meta del lazo 2
   };
 }
 
